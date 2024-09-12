@@ -1,0 +1,139 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
+using System.Web.Http;
+
+namespace TestAPI.Controllers
+{
+    public class Multi_AuthController : ApiController
+    {
+        [HttpPost]
+        //[Route("api/test/process")]
+        public IHttpActionResult ProcessRequest([FromBody] RequestModel request)
+        {
+            var id = Request.Headers.GetValues("id").FirstOrDefault();
+            var sec = Request.Headers.GetValues("sec").FirstOrDefault();
+            var ser = Request.Headers.GetValues("ser").FirstOrDefault();
+            // Validate headers and request body
+
+            //// Create response based on request
+            //var response = new ResponseModel
+            //{
+            //    SearchAtt = new List<ResponseSearchAtt>(),
+            //    Notification = new List<ResponseNotification>()
+            //};
+
+            //foreach (var att in request.SearchAtt)
+            //{
+            //    var responseAtt = new ResponseSearchAtt
+            //    {
+            //        AttName = att.AttName,
+            //        AttVal = att.AttVal
+            //    };
+            //    response.SearchAtt.Add(responseAtt);
+            //}
+
+            //foreach (var noty in request.Notification)
+            //{
+            //    var responseNoty = new ResponseNotification
+            //    {
+            //        NotyType = noty.NotyType,
+            //        MsgBody = noty.MsgBody,
+            //        TemId = noty.TemId,
+            //        Stsus = noty.NotyType == "email" ? "success" : "failed",
+            //        ErrMsg = noty.NotyType == "email" ? null : "att not present"
+            //    };
+            //    response.Notification.Add(responseNoty);
+            //}
+
+            //return Ok(response);
+            // Log headers
+            System.Diagnostics.Debug.WriteLine($"ID: {id}, SEC: {sec}, SER: {ser}");
+
+            // Validate headers and request body
+            if (request == null)
+            {
+                return BadRequest("Request body is null");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Create response based on request
+            var response = new ResponseModel
+            {
+                SearchAtt = new List<ResponseSearchAtt>
+                {
+                    new ResponseSearchAtt { AttName = request.AttName, AttVal = request.AttVal }
+                },
+                Notification = new List<ResponseNotification>
+                {
+                    new ResponseNotification
+                    {
+                        NotyType = request.NotyType1,
+                        MsgBody = request.MsgBody1,
+                        TemId = request.TemId1,
+                        Stsus = request.NotyType1 == "email" ? "success" : "failed",
+                        ErrMsg = request.NotyType1 == "email" ? null : "att not present"
+                    },
+                    new ResponseNotification
+                    {
+                        NotyType = request.NotyType2,
+                        MsgBody = request.MsgBody2,
+                        TemId = request.TemId2,
+                        Stsus = request.NotyType2 == "email" ? "success" : "failed",
+                        ErrMsg = request.NotyType2 == "email" ? null : "att not present"
+                    }
+                }
+            };
+
+            return Ok(response);
+        }
+    }
+
+    public class SearchAtt
+    {
+        public string AttName { get; set; }
+        public string AttVal { get; set; }
+    }
+
+    public class Notification
+    {
+        public string NotyType { get; set; }
+        public string MsgBody { get; set; }
+        public string TemId { get; set; }
+    }
+
+    public class RequestModel
+    {
+        public Header Header { get; set; }
+        public List<SearchAtt> SearchAtt { get; set; }
+        public List<Notification> Notification { get; set; }
+        public string Pass { get; set; }
+    }
+    public class ResponseSearchAtt
+    {
+        public string AttName { get; set; }
+        public string AttVal { get; set; }
+    }
+
+    public class ResponseNotification
+    {
+        public string NotyType { get; set; }
+        public string MsgBody { get; set; }
+        public string TemId { get; set; }
+        public string Stsus { get; set; }
+        public string ErrMsg { get; set; }
+    }
+
+    public class ResponseModel
+    {
+        public List<ResponseSearchAtt> SearchAtt { get; set; }
+        public List<ResponseNotification> Notification { get; set; }
+    }
+}
